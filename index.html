@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Invoice Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF Library for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF AutoTable Plugin for Table Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-5xl mx-auto my-10 p-8 bg-white shadow-lg rounded-lg">
+        <h1 class="text-3xl font-semibold text-indigo-600 mb-8">Create Invoice</h1>
+
+        <!-- Company Logo and Details -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div class="mb-6 md:mb-0">
+                <label class="block text-gray-700 mb-2 font-medium" for="company-logo">Company Logo</label>
+                <input type="file" id="company-logo" accept="image/*" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="w-full md:w-1/2">
+                <label class="block text-gray-700 mb-2 font-medium" for="company-name">Company Name</label>
+                <input type="text" id="company-name" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Company Name" required>
+                
+                <label class="block text-gray-700 mt-6 mb-2 font-medium" for="company-address">Company Address</label>
+                <textarea id="company-address" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Company Address" required></textarea>
+            </div>
+        </div>
+
+        <!-- Invoice Header -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Left column for client details -->
+            <div>
+                <h2 class="text-xl font-semibold text-indigo-600 mb-4">Client Details</h2>
+                <label class="block text-gray-700 mb-2 font-medium" for="client-name">Client Name</label>
+                <input type="text" id="client-name" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter client name" required>
+
+                <label class="block text-gray-700 mt-6 mb-2 font-medium" for="client-email">Client Email</label>
+                <input type="email" id="client-email" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter client email" required>
+            </div>
+
+            <!-- Right column for invoice details -->
+            <div>
+                <h2 class="text-xl font-semibold text-indigo-600 mb-4">Invoice Details</h2>
+                <label class="block text-gray-700 mb-2 font-medium" for="invoice-number">Invoice Number</label>
+                <input type="text" id="invoice-number" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="INV-0001" required>
+
+                <label class="block text-gray-700 mt-6 mb-2 font-medium" for="invoice-date">Invoice Date</label>
+                <input type="date" id="invoice-date" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+
+                <label class="block text-gray-700 mt-6 mb-2 font-medium" for="payment-terms">Payment Terms</label>
+                <input type="text" id="payment-terms" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Net 30">
+            </div>
+        </div>
+
+        <!-- Invoice Table -->
+        <div class="overflow-x-auto mb-8">
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr class="bg-indigo-100 text-indigo-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Item Description</th>
+                        <th class="py-3 px-6 text-right">Quantity</th>
+                        <th class="py-3 px-6 text-right">Rate</th>
+                        <th class="py-3 px-6 text-right">Amount</th>
+                        <th class="py-3 px-6 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items" class="text-gray-600 text-sm font-light">
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left">
+                            <input type="text" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Item description" required>
+                        </td>
+                        <td class="py-3 px-6 text-right">
+                            <input type="number" class="w-20 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 quantity" placeholder="1" min="1" value="1" required>
+                        </td>
+                        <td class="py-3 px-6 text-right">
+                            <input type="number" class="w-24 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 rate" placeholder="0.00" step="0.01" min="0" value="0.00" required>
+                        </td>
+                        <td class="py-3 px-6 text-right">
+                            <input type="text" class="w-24 border border-gray-300 p-2 rounded bg-gray-100 text-right amount" value="0.00" readonly>
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            <button class="remove-item text-red-500 hover:text-red-700 transition-colors">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add item button -->
+        <div class="mb-8">
+            <button id="add-item" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-md transition-colors flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Item
+            </button>
+        </div>
+
+        <!-- Tax Rates Selection -->
+        <div class="mb-8">
+            <label class="block text-gray-700 mb-2 font-medium" for="tax-rate">Tax Rate</label>
+            <select id="tax-rate" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="0">No Tax</option>
+                <option value="5">5%</option>
+                <option value="10" selected>10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+            </select>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="mb-8">
+            <label class="block text-gray-700 mb-2 font-medium" for="notes">Notes</label>
+            <textarea id="notes" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Additional notes or terms"></textarea>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="bg-indigo-50 p-6 rounded-lg mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-lg font-medium text-indigo-700">Summary</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-700">Subtotal:</span>
+                <input type="text" id="subtotal" class="w-32 text-right border border-gray-300 p-2 rounded bg-gray-100" value="0.00" readonly>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-700">Tax (<span id="tax-rate-display">10%</span>):</span>
+                <input type="text" id="tax" class="w-32 text-right border border-gray-300 p-2 rounded bg-gray-100" value="0.00" readonly>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-700 font-semibold">Total:</span>
+                <input type="text" id="total" class="w-32 text-right border border-gray-300 p-2 rounded bg-gray-100 font-bold" value="0.00" readonly>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-6">
+            <button id="create-pdf" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 3a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V9l-6-6H4z" />
+                </svg>
+                Download PDF
+            </button>
+            <button id="create-invoice" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition-colors flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m2 0a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
+                Create Invoice
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript for dynamic functionality -->
+    <script>
+        // Function to update amounts
+        function updateAmounts() {
+            const items = document.querySelectorAll('#invoice-items tr');
+            let subtotal = 0;
+
+            items.forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const rate = parseFloat(row.querySelector('.rate').value) || 0;
+                const amount = quantity * rate;
+                row.querySelector('.amount').value = amount.toFixed(2);
+                subtotal += amount;
+            });
+
+            document.getElementById('subtotal').value = subtotal.toFixed(2);
+
+            const taxRate = parseFloat(document.getElementById('tax-rate').value);
+            const tax = subtotal * (taxRate / 100);
+            document.getElementById('tax').value = tax.toFixed(2);
+
+            const total = subtotal + tax;
+            document.getElementById('total').value = total.toFixed(2);
+            document.getElementById('tax-rate-display').innerText = taxRate + '%';
+        }
+
+        // Initial calculation
+        updateAmounts();
+
+        // Event listener for adding items
+        document.getElementById('add-item').addEventListener('click', function() {
+            const row = document.createElement('tr');
+            row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+            row.innerHTML = `
+                <td class="py-3 px-6 text-left">
+                    <input type="text" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Item description" required>
+                </td>
+                <td class="py-3 px-6 text-right">
+                    <input type="number" class="w-20 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 quantity" placeholder="1" min="1" value="1" required>
+                </td>
+                <td class="py-3 px-6 text-right">
+                    <input type="number" class="w-24 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 rate" placeholder="0.00" step="0.01" min="0" value="0.00" required>
+                </td>
+                <td class="py-3 px-6 text-right">
+                    <input type="text" class="w-24 border border-gray-300 p-2 rounded bg-gray-100 text-right amount" value="0.00" readonly>
+                </td>
+                <td class="py-3 px-6 text-center">
+                    <button class="remove-item text-red-500 hover:text-red-700 transition-colors">Remove</button>
+                </td>
+            `;
+            document.getElementById('invoice-items').appendChild(row);
+            attachRowListeners(row);
+            updateAmounts();
+        });
+
+        // Function to attach listeners to a row
+        function attachRowListeners(row) {
+            const quantityInput = row.querySelector('.quantity');
+            const rateInput = row.querySelector('.rate');
+            const removeButton = row.querySelector('.remove-item');
+
+            quantityInput.addEventListener('input', updateAmounts);
+            rateInput.addEventListener('input', updateAmounts);
+            removeButton.addEventListener('click', function() {
+                row.remove();
+                updateAmounts();
+            });
+        }
+
+        // Attach listeners to existing rows
+        document.querySelectorAll('#invoice-items tr').forEach(row => {
+            attachRowListeners(row);
+        });
+
+        // Event listener for tax rate change
+        document.getElementById('tax-rate').addEventListener('change', updateAmounts);
+
+        // PDF Generation using jsPDF
+        document.getElementById('create-pdf').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Company Details
+            const companyName = document.getElementById('company-name').value;
+            const companyAddress = document.getElementById('company-address').value;
+            doc.setFontSize(20);
+            doc.setTextColor(79, 70, 229); // Indigo color
+            doc.text(companyName, 10, 20);
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0); // Black color
+            doc.text(companyAddress, 10, 30);
+
+            // Client Details
+            const clientName = document.getElementById('client-name').value;
+            const clientEmail = document.getElementById('client-email').value;
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229); // Indigo color
+            doc.text('Bill To:', 10, 50);
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0); // Black color
+            doc.text(clientName, 30, 50);
+            doc.text(clientEmail, 30, 60);
+
+            // Invoice Details
+            const invoiceNumber = document.getElementById('invoice-number').value;
+            const invoiceDate = document.getElementById('invoice-date').value;
+            const paymentTerms = document.getElementById('payment-terms').value;
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229); // Indigo color
+            doc.text('Invoice Details:', 10, 80);
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0); // Black color
+            doc.text(`Invoice Number: ${invoiceNumber}`, 30, 80);
+            doc.text(`Invoice Date: ${invoiceDate}`, 30, 90);
+            doc.text(`Payment Terms: ${paymentTerms}`, 30, 100);
+
+            // Table Headers and Items
+            const tableData = Array.from(document.querySelectorAll('#invoice-items tr')).map(row => {
+                const description = row.querySelector('input[type="text"]').value;
+                const quantity = row.querySelector('.quantity').value;
+                const rate = row.querySelector('.rate').value;
+                const amount = row.querySelector('.amount').value;
+                return [description, quantity, `$${parseFloat(rate).toFixed(2)}`, `$${parseFloat(amount).toFixed(2)}`];
+            });
+
+            // Using autoTable plugin for better table formatting
+            doc.autoTable({
+                startY: 110,
+                head: [['Item Description', 'Quantity', 'Rate', 'Amount']],
+                body: tableData,
+                theme: 'striped',
+                styles: { halign: 'right' },
+                headStyles: { fillColor: [220, 220, 220], halign: 'left', textColor: [79, 70, 229] },
+                columnStyles: {
+                    0: { halign: 'left' },
+                    1: { halign: 'right' },
+                    2: { halign: 'right' },
+                    3: { halign: 'right' },
+                },
+            });
+
+            // Summary
+            const subtotal = document.getElementById('subtotal').value;
+            const tax = document.getElementById('tax').value;
+            const total = document.getElementById('total').value;
+            const finalY = doc.lastAutoTable.finalY + 10;
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0); // Black color
+            doc.text(`Subtotal: $${subtotal}`, 140, finalY);
+            doc.text(`Tax: $${tax}`, 140, finalY + 10);
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229); // Indigo color
+            doc.text(`Total: $${total}`, 140, finalY + 20);
+
+            // Notes
+            const notes = document.getElementById('notes').value;
+            if (notes) {
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0); // Black color
+                doc.text(`Notes: ${notes}`, 10, finalY + 40);
+            }
+
+            // Optional: Add company logo to PDF if uploaded
+            const logoInput = document.getElementById('company-logo');
+            if (logoInput.files && logoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        doc.addImage(img, 'PNG', 150, 10, 40, 40);
+                        doc.save(`Invoice_${invoiceNumber}.pdf`);
+                    }
+                }
+                reader.readAsDataURL(logoInput.files[0]);
+            } else {
+                doc.save(`Invoice_${invoiceNumber}.pdf`);
+            }
+        });
+
+        // Create Invoice Button
+        document.getElementById('create-invoice').addEventListener('click', function() {
+            alert('Invoice Created Successfully!');
+            // Here you can implement saving the invoice to a database or any other action
+        });
+    </script>
+</body>
+</html>
